@@ -1,8 +1,13 @@
 var io = require('socket.io').listen(3000);
 
 io.sockets.on('connection', function (socket) {
-  socket.emit('news', { hello: 'world' });
-  socket.on('my other event', function (data) {
-    console.log(data);
-  });
+  
 });
+
+
+
+function update () {
+	io.sockets.emit('sever_update', { hello: 'world'});
+}
+
+setInterval(update, 1000);
