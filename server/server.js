@@ -4,7 +4,9 @@ io.sockets.on('connection', function (socket) {
   
 });
 
-
+io.sockets.on('client_update', function (data) {
+	console.log(data);
+});
 
 function update () {
 	io.sockets.emit('server_update', { hello: 'world'});
