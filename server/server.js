@@ -7,7 +7,7 @@ io.sockets.on('connection', function (socket) {
 
 
 function update () {
-	io.sockets.emit('sever_update', { hello: 'world'});
+	io.sockets.emit('server_update', { hello: 'world'});
 }
 
 setInterval(update, 1000);
