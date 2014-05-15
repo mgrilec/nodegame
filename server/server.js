@@ -12,16 +12,16 @@ io.sockets.on('connection', function (socket) {
 		}
 		
 		if(data.key == 'left') {
-			ships[data.id].y -= 5;
+			ships[data.id].x -= 5;
 		}
 		else if (data.key == 'right') {
-			ships[data.id].y += 5;
+			ships[data.id].x += 5;
 		}
 		else if (data.key == 'up') {
-			ships[data.id].x -=5;
+			ships[data.id].y -=5;
 		}
 		else if (data.key == 'down') {
-			ships[data.id].x += 5;
+			ships[data.id].y += 5;
 		}
 
 
