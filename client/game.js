@@ -17,7 +17,21 @@ function create() {
 function update() {
 	if (game.input.keyboard.isDown(Phaser.Keyboard.LEFT))
 	{
-		console.log('space');
-		socket.emit('client_update', { id: 'me' });
+		socket.emit('client_update', { id: 'me', key: 'left' });
+	}
+
+	if (game.input.keyboard.isDown(Phaser.Keyboard.RIGHT))
+	{
+		socket.emit('client_update', { id: 'me', key: 'right' });
+	}
+
+	if (game.input.keyboard.isDown(Phaser.Keyboard.UP))
+	{
+		socket.emit('client_update', { id: 'me', key: 'up' });
+	}
+
+	if (game.input.keyboard.isDown(Phaser.Keyboard.DOWN))
+	{
+		socket.emit('client_update', { id: 'me', key: 'down' });
 	}
 }
