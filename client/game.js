@@ -9,13 +9,15 @@ var socket;
 
 function create() {
 	socket = io.connect('http://localhost:3000');
-	  socket.on('server_update', function (data) {
-	    console.log(data);
-	  });
-
-	  console.log("hi");
+	socket.on('server_update', function (data) {
+		console.log(data);
+	});
 }
 
 function update() {
-	socket.emit('client_update', { id: "me" });
+	if (game.input.keyboard.isDown(Phaser.Keyboard.LEFT))
+	{
+		console.log('space');
+		socket.emit('client_update', { id: 'me' });
+	}
 }
