@@ -28,8 +28,8 @@ io.sockets.on('connection', function (socket) {
 	});
 });
 
-function update () {
+function networkUpdate () {
 	io.sockets.emit('server_update', {ships: ships});
 }
 
-setInterval(update, 1000);
+setInterval(update, 100);
