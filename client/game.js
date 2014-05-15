@@ -14,7 +14,7 @@ function preload() {
 }
 
 function create() {
-	socket = io.connect('http://localhost:3000');
+	socket = io.connect('http://box.mgrilec.com:3000');
 	socket.on('server_update', function (data) {
 
 		// get all server ship ids
@@ -50,7 +50,11 @@ function create() {
 
 	});
 
+	// player enters name
 	name = prompt('enter name');
+
+	// set world bounds
+	game.world.setBounds(-2000, -2000, 4000, 4000);
 }
 
 function update() {
@@ -60,7 +64,7 @@ function update() {
 
 	// camera follow player
 	if (player) {
-
+		game.camera.focusOn(player);
 	}
 
 	// controls
