@@ -1,5 +1,5 @@
 var game = new Phaser.Game(800, 600, Phaser.AUTO, 'game', {
-    //preload: preload,
+    preload: preload,
     create: create,
     update: update,
     //render: render
@@ -8,6 +8,10 @@ var game = new Phaser.Game(800, 600, Phaser.AUTO, 'game', {
 var socket;
 var name;
 var ships = {};
+
+function preload() {
+	game.load.image('ship', 'assets/ship.png');
+}
 
 function create() {
 	socket = io.connect('http://localhost:3000');
@@ -31,14 +35,17 @@ function create() {
 		for (var idIndex in serverIds) {
 			var id = serverIds[idIndex];
 			if (!ships[id]) {
-				ships[id] = data.ships[id];
+				ships[id] = game.add.sprite(0, 0, 'ship');
+				ships[id].x = data.ships[id].x;
+				ships[id].y = data.ships[id].y;
 				console.log('added: ' + id);
 			}
 		}
 
 		// update ships
 		for (var id in ships) {
-			ships[id] = data.ships[id];
+			ships[id].x = data.ships[id].x;
+			ships[id].y = data.ships[id].y;
 		}
 
 	});
