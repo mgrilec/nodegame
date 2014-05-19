@@ -23,27 +23,33 @@ io.sockets.on('connection', function (socket) {
 			ships[data.id] = {};
 			ships[data.id].x = 0;
 			ships[data.id].y = 0;
+			ships[data.id].angle = 0;
+			ships[data.id].speed = 0;
+			ships[data.id].torque = 0;
 		}
+
+		var ship = ships[data.id];
 		
 		if(data.key == 'left') {
-			ships[data.id].x -= 5;
+			ship.torque = -3;
 		}
 		else if (data.key == 'right') {
-			ships[data.id].x += 5;
+			ship.torque = 3;
 		}
 		else if (data.key == 'up') {
-			ships[data.id].y -=5;
+			ship.speed = 5;
 		}
 		else if (data.key == 'down') {
-			ships[data.id].y += 5;
+			ship.speed = -5;
 		}
 	});
 
 	socket.on('disconnect', function () {
 		for(var id in sockets) {
 			if(sockets[id] == socket){
-				console.log(id);
+				delete sockets[id];
 				delete ships[id];
+				break;
 			}
 		}
 	});
@@ -53,6 +59,18 @@ function networkUpdate () {
 	io.sockets.emit('server_update', {ships: ships});
 }
 
-setInterval(networkUpdate, 30);
+function update() {
+	for (var shipId in ships) {
+		var ship = ships[shipId];
+		ship.x += Math.cos(ship.angle * Math.PI / 180) * ship.speed;
+		ship.y += Math.sin(ship.angle * Math.PI / 180) * ship.speed;
+		ship.angle += ship.torque;
 
+		ship.speed *= 0.9;
+		ship.torque *= 0.9;
+	}
+}
+
+setInterval(update, 10);
+setInterval(networkUpdate, 30);
 console.log('view the example on http://127.0.0.1:3001');

@@ -26,6 +26,7 @@ function create() {
 		// remove ships with non-existent server ids
 		for (var id in ships) {
 			if (serverIds.indexOf(id) < 0) {
+				ships[id].destroy();
 				delete ships[id];
 				console.log('deleted: ' + id);
 			}
@@ -38,6 +39,8 @@ function create() {
 				ships[id] = game.add.sprite(0, 0, 'ship');
 				ships[id].x = data.ships[id].x;
 				ships[id].y = data.ships[id].y;
+				ships[id].angle = data.ships[id].angle;
+				ships[id].anchor.setTo(0.5, 0.5);
 				console.log('added: ' + id);
 			}
 		}
@@ -46,6 +49,7 @@ function create() {
 		for (var id in ships) {
 			ships[id].x = data.ships[id].x;
 			ships[id].y = data.ships[id].y;
+			ships[id].angle = data.ships[id].angle;
 		}
 
 	});
