@@ -1,4 +1,15 @@
-var io = require('socket.io').listen(3000);
+var express = require('express');
+var socketIo = require('socket.io');
+var app = express();
+
+app.use(express.static('../client'));
+app.get('/', function(req, res) {
+	res.redirect('/index.html');
+});
+
+var server = app.listen(3000);
+
+var io = require('socket.io').listen(server);
 io.set("log level", 2);
 var ships = {};
 var sockets = {};
@@ -43,3 +54,5 @@ function networkUpdate () {
 }
 
 setInterval(networkUpdate, 30);
+
+console.log('view the example on http://127.0.0.1:3001');
