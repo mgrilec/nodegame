@@ -16,7 +16,7 @@ function preload() {
 function create() {
 
     // init networking
-    socket = io.connect(location.host);
+    socket = io.connect(location.origin);
 
     // register server update handler
     socket.on('server_update', serverUpdateHandler);
