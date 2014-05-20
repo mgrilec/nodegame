@@ -13,7 +13,6 @@ var server = app.listen(3000);
 var io = require('socket.io').listen(server);
 io.set("log level", 2);
 var ships = {};
-var sockets = {};
 
 io.sockets.on('connection', function (socket) {
 	socket.on('client_join', clientJoinHandler);
@@ -40,7 +39,7 @@ function update() {
 function clientJoinHandler(data) {
 	var socket = this;
 	var id = data.id;
-	sockets[id] = socket;
+	socket.name = data.id;
 	ships[id] = {};
 	ships[id].x = 0;
 	ships[id].y = 0;
@@ -52,7 +51,7 @@ function clientJoinHandler(data) {
 
 function clientUpdateHandler(data) {
 	var socket = this;
-	var id = _.find(Object.keys(sockets), function(id) { return sockets[id] == socket});
+	var id = socket.name;
 
 	if(data.action == 'left') {
 		ships[id].torque = -3;
@@ -70,8 +69,7 @@ function clientUpdateHandler(data) {
 
 function clientDisconnectHandler() {
 	var socket = this;
-	var id = _.find(Object.keys(sockets), function(id) { return sockets[id] == socket});
-	delete sockets[id];
+	var id = socket.name;
 	delete ships[id];
 	console.log(id + " left");
 }
