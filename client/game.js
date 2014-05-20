@@ -16,7 +16,7 @@ function preload() {
 function create() {
 
     // init networking
-    socket = io.connect(location.host);
+    socket = io.connect(location.origin);
 
     // register server update handler
     socket.on('server_update', serverUpdateHandler);
@@ -28,7 +28,7 @@ function create() {
     name = prompt('enter name');
 
     // send auth
-    socket.emit('client_join', { id: name });
+    socket.emit('client_join', { name: name });
 }
 
 function update() {
