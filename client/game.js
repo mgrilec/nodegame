@@ -11,6 +11,7 @@ var ships = {};
 
 function preload() {
     game.load.image('ship', 'assets/ship.png');
+    game.load.bitmapFont('visitor', 'assets/fonts/visitor.png', 'assets/fonts/visitor.xml');
 }
 
 function create() {
@@ -84,6 +85,7 @@ function serverUpdateHandler(data) {
     for (var id in ships) {
         if (serverIds.indexOf(id) < 0) {
             console.log('deleting: ' + ships[id].name);
+            ships[id].label.destroy();
             ships[id].destroy();
             delete ships[id];
         }
@@ -99,6 +101,14 @@ function serverUpdateHandler(data) {
             ships[id].rotation = data.ships[id].rotation;
             ships[id].name = data.ships[id].name;
             ships[id].anchor.setTo(0.5, 0.5);
+            ships[id].label = game.add.bitmapText(0, -20, 'visitor', ships[id].name, 16);
+            ships[id].label.owner = ships[id];
+            if (id == player.id)
+                ships[id].label.tint = 0xFF0000;
+            ships[id].label.update = function() {
+                this.x = this.owner.x - this.textWidth / 2;
+                this.y = this.owner.y - 50;
+            }
             console.log('added: ' + ships[id].name);
         }
     }
