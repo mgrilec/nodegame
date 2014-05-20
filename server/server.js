@@ -15,7 +15,7 @@ io.set("log level", 2);
 var ships = {};
 
 io.sockets.on('connection', function (socket) {
-	socket.on('client_join', clientJoinHandler);
+	socket.on('join_request', clientJoinRequestHandler);
 	socket.on('client_update', clientUpdateHandler);
 	socket.on('disconnect', clientDisconnectHandler);
 });
@@ -36,10 +36,12 @@ function update() {
 	}
 }
 
-function clientJoinHandler(data) {
+function clientJoinRequestHandler(data) {
 	var socket = this;
 	var id = socket.id;
 	var name = socket.name = data.name;
+	socket.emit('join_response', { id: socket.id });
+
 	ships[id] = {};
 	ships[id].x = 0;
 	ships[id].y = 0;

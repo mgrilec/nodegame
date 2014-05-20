@@ -6,7 +6,7 @@ var game = new Phaser.Game(800, 600, Phaser.AUTO, 'game', {
 });
 
 var socket;
-var name;
+var player = {};
 var ships = {};
 
 function preload() {
@@ -18,27 +18,28 @@ function create() {
     // init networking
     socket = io.connect(location.origin);
 
-    // register server update handler
+    // register handlers
+    socket.on('join_response', joinResponseHandler);
     socket.on('server_update', serverUpdateHandler);
 
     // set world bounds
     game.world.setBounds(-10000, -10000, 20000, 20000);
 
     // player enters name
-    name = prompt('enter name');
+    player.name = prompt('enter name');
 
     // send auth
-    socket.emit('client_join', { name: name });
+    socket.emit('join_request', { name: name });
 }
 
 function update() {
 
     // get current player ship
-    var player = ships[name];
+    var playerShip = ships[player.id];
 
     // camera follow player
-    if (player) {
-        game.camera.focusOn(player);
+    if (playerShip) {
+        game.camera.focusOn(playerShip);
     }
 
     // controls
@@ -69,6 +70,10 @@ function update() {
 
 function render() {
 	
+}
+
+function joinResponseHandler(data) {
+    player.id = data.id;
 }
 
 function serverUpdateHandler(data) {
