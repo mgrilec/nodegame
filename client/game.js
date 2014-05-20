@@ -29,7 +29,7 @@ function create() {
     player.name = prompt('enter name');
 
     // send auth
-    socket.emit('join_request', { name: name });
+    socket.emit('join_request', { name: player.name });
 }
 
 function update() {
@@ -78,17 +78,14 @@ function joinResponseHandler(data) {
 
 function serverUpdateHandler(data) {
     // get all server ship ids
-    var serverIds = [];
-    for (var id in data.ships) {
-        serverIds.push(id);
-    }
+    var serverIds = Object.keys(data.ships);
 
     // remove ships with non-existent server ids
     for (var id in ships) {
         if (serverIds.indexOf(id) < 0) {
+            console.log('deleting: ' + ships[id].name);
             ships[id].destroy();
             delete ships[id];
-            console.log('deleted: ' + id);
         }
     }
 
@@ -99,9 +96,10 @@ function serverUpdateHandler(data) {
             ships[id] = game.add.sprite(0, 0, 'ship');
             ships[id].x = data.ships[id].x;
             ships[id].y = data.ships[id].y;
-            ships[id].angle = data.ships[id].angle;
+            ships[id].rotation = data.ships[id].rotation;
+            ships[id].name = data.ships[id].name;
             ships[id].anchor.setTo(0.5, 0.5);
-            console.log('added: ' + id);
+            console.log('added: ' + ships[id].name);
         }
     }
 
@@ -109,6 +107,6 @@ function serverUpdateHandler(data) {
     for (var id in ships) {
         ships[id].x = data.ships[id].x;
         ships[id].y = data.ships[id].y;
-        ships[id].angle = data.ships[id].angle;
+        ships[id].rotation = data.ships[id].rotation;
     }
 }

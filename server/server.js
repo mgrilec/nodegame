@@ -12,7 +12,17 @@ var server = app.listen(3000);
 
 var io = require('socket.io').listen(server);
 io.set("log level", 2);
+
 var ships = {};
+var server = {
+
+	// server update rate per second
+	tickRate: 60,
+	dt: 1 / 60,
+
+	// server network update rate per second
+	updateRate: 30,
+}
 
 io.sockets.on('connection', function (socket) {
 	socket.on('join_request', clientJoinRequestHandler);
@@ -27,9 +37,9 @@ function networkUpdate () {
 function update() {
 	for (var shipId in ships) {
 		var ship = ships[shipId];
-		ship.x += Math.cos(ship.angle * Math.PI / 180) * ship.speed;
-		ship.y += Math.sin(ship.angle * Math.PI / 180) * ship.speed;
-		ship.angle += ship.torque;
+		ship.x += Math.cos(ship.rotation) * ship.speed * server.dt;
+		ship.y += Math.sin(ship.rotation) * ship.speed * server.dt;
+		ship.rotation += ship.torque * server.dt;
 
 		ship.speed *= 0.9;
 		ship.torque *= 0.9;
@@ -45,9 +55,10 @@ function clientJoinRequestHandler(data) {
 	ships[id] = {};
 	ships[id].x = 0;
 	ships[id].y = 0;
-	ships[id].angle = 0;
+	ships[id].rotation = 0;
 	ships[id].speed = 0;
 	ships[id].torque = 0;
+	ships[id].name = name;
 	console.log(name + " joined, id:" + id);
 }
 
@@ -56,16 +67,16 @@ function clientUpdateHandler(data) {
 	var id = socket.id;
 
 	if(data.action == 'left') {
-		ships[id].torque = -3;
+		ships[id].torque = -5;
 	}
 	else if (data.action == 'right') {
-		ships[id].torque = 3;
+		ships[id].torque = 5;
 	}
 	else if (data.action == 'up') {
-		ships[id].speed = 5;
+		ships[id].speed = 200;
 	}
 	else if (data.action == 'down') {
-		ships[id].speed = -5;
+		ships[id].speed = -200;
 	}
 }
 
@@ -77,6 +88,6 @@ function clientDisconnectHandler() {
 	console.log(name + " left, id:" + id);
 }
 
-setInterval(update, 10);
-setInterval(networkUpdate, 30);
+setInterval(update, 1000 / server.tickRate);
+setInterval(networkUpdate, 1000 / server.updateRate);
 console.log('view the example on http://127.0.0.1:3000');
