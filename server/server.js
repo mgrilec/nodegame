@@ -38,20 +38,20 @@ function update() {
 
 function clientJoinHandler(data) {
 	var socket = this;
-	var id = data.id;
-	socket.name = data.id;
+	var id = socket.id;
+	var name = socket.name = data.name;
 	ships[id] = {};
 	ships[id].x = 0;
 	ships[id].y = 0;
 	ships[id].angle = 0;
 	ships[id].speed = 0;
 	ships[id].torque = 0;
-	console.log(data.id + " joined");
+	console.log(name + " joined, id:" + id);
 }
 
 function clientUpdateHandler(data) {
 	var socket = this;
-	var id = socket.name;
+	var id = socket.id;
 
 	if(data.action == 'left') {
 		ships[id].torque = -3;
@@ -69,9 +69,10 @@ function clientUpdateHandler(data) {
 
 function clientDisconnectHandler() {
 	var socket = this;
-	var id = socket.name;
+	var id = socket.id;
+	var name = socket.name;
 	delete ships[id];
-	console.log(id + " left");
+	console.log(name + " left, id:" + id);
 }
 
 setInterval(update, 10);

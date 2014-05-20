@@ -28,7 +28,7 @@ function create() {
     name = prompt('enter name');
 
     // send auth
-    socket.emit('client_join', { id: name });
+    socket.emit('client_join', { name: name });
 }
 
 function update() {
