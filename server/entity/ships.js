@@ -21,6 +21,9 @@ Ships.prototype.get = function(id) {
 };
 
 Ships.prototype.del = function(id) {
+	if (!this.list[id])
+		return;
+
 	console.log(this.list[id].name + " left, id:" + id);
 	delete this.list[id];
 };

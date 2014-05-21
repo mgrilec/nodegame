@@ -8,10 +8,12 @@ var game = new Phaser.Game(800, 600, Phaser.AUTO, 'game', {
 var socket;
 var player = {};
 var ships = {};
-var groups = { ships: '', labels: '' };
+var groups = { background: '', ships: '', labels: '', foreground: '' };
 
 function preload() {
     game.load.image('ship', 'assets/ship.png');
+    game.load.image('background', 'assets/background.png');
+    game.load.image('background_detail', 'assets/background_detail.png');
     game.load.bitmapFont('visitor', 'assets/fonts/visitor.png', 'assets/fonts/visitor.xml');
 }
 
@@ -24,15 +26,21 @@ function create() {
     socket.on('join_response', joinResponseHandler);
     socket.on('server_update', serverUpdateHandler);
 
-    // set world bounds
-    game.world.setBounds(-10000, -10000, 20000, 20000);
-
-    // player enters name
-    player.name = prompt('enter name');
-
     // init groups
     for (var groupName in groups)
         groups[groupName] = game.add.group();
+
+    // set world bounds
+    game.world.setBounds(-10000, -10000, 20000, 20000);
+
+    // create backgrounds
+    var background = game.add.tileSprite(-10000, -10000, 20000, 20000, 'background');
+    var backgroundDetail = game.add.tileSprite(-10000, -10000, 20000, 20000, 'background_detail');
+    groups.background.add(background);
+    groups.background.add(backgroundDetail);
+
+    // player enters name
+    player.name = prompt('enter name');
 
     // send auth
     socket.emit('join_request', { name: player.name });
@@ -106,7 +114,7 @@ function serverUpdateHandler(data) {
             ships[id].rotation = data.ships[id].rotation;
             ships[id].name = data.ships[id].name;
             ships[id].anchor.setTo(0.5, 0.5);
-            groups['ships'].add(ships[id]);
+            groups.ships.add(ships[id]);
 
             // set label
             ships[id].label = game.add.bitmapText(0, -20, 'visitor', ships[id].name, 16);
@@ -114,7 +122,7 @@ function serverUpdateHandler(data) {
             if (id == player.id)
                 ships[id].label.tint = 0xFF0000;
 
-            groups['labels'].add(ships[id].label);
+            groups.labels.add(ships[id].label);
             ships[id].label.update = function() {
                 this.x = this.owner.x - this.textWidth / 2;
                 this.y = this.owner.y - 50;
