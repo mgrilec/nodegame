@@ -8,6 +8,7 @@ var game = new Phaser.Game(800, 600, Phaser.AUTO, 'game', {
 var socket;
 var player = {};
 var ships = {};
+var groups = { ships: '', labels: '' };
 
 function preload() {
     game.load.image('ship', 'assets/ship.png');
@@ -28,6 +29,10 @@ function create() {
 
     // player enters name
     player.name = prompt('enter name');
+
+    // init groups
+    for (var groupName in groups)
+        groups[groupName] = game.add.group();
 
     // send auth
     socket.emit('join_request', { name: player.name });
@@ -101,14 +106,20 @@ function serverUpdateHandler(data) {
             ships[id].rotation = data.ships[id].rotation;
             ships[id].name = data.ships[id].name;
             ships[id].anchor.setTo(0.5, 0.5);
+            groups['ships'].add(ships[id]);
+
+            // set label
             ships[id].label = game.add.bitmapText(0, -20, 'visitor', ships[id].name, 16);
             ships[id].label.owner = ships[id];
             if (id == player.id)
                 ships[id].label.tint = 0xFF0000;
+
+            groups['labels'].add(ships[id].label);
             ships[id].label.update = function() {
                 this.x = this.owner.x - this.textWidth / 2;
                 this.y = this.owner.y - 50;
             }
+
             console.log('added: ' + ships[id].name);
         }
     }
