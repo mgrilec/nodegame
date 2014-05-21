@@ -6,11 +6,11 @@ io.set("log level", 2);
 
 var server = {
 
-	// server update rate per second
+	// update rate per second
 	tickRate: 60,
 	dt: 1 / 60,
 
-	// server network update rate per second
+	// network update rate per second
 	updateRate: 30,
 };
 
@@ -25,14 +25,7 @@ function networkUpdate () {
 }
 
 function update() {
-	Ships.each(function(ship, id) {
-		ship.x += Math.cos(ship.rotation) * ship.speed * server.dt;
-		ship.y += Math.sin(ship.rotation) * ship.speed * server.dt;
-		ship.rotation += ship.torque * server.dt;
-
-		ship.speed *= 0.9;
-		ship.torque *= 0.9;
-	});
+	Ships.update(server.dt);
 }
 
 function clientJoinRequestHandler(data) {

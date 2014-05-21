@@ -1,4 +1,5 @@
 var _ = require('underscore');
+var Ship = require('./ship');
 
 function Ships() {
 	this.list = {};
@@ -11,14 +12,7 @@ Ships.prototype.new = function(id, name) {
 	}
 
 	// new connection
-	this.list[id] = {};
-	this.list[id].x = 0;
-	this.list[id].y = 0;
-	this.list[id].rotation = 0;
-	this.list[id].speed = 0;
-	this.list[id].torque = 0;
-	this.list[id].name = name;
-	
+	this.list[id] = new Ship(name);	
 	console.log(name + " joined, id:" + id);
 };
 
@@ -34,6 +28,12 @@ Ships.prototype.del = function(id) {
 Ships.prototype.each = function(cb) {
 	_.each(this.list, cb);
 };
+
+Ships.prototype.update = function(dt) {
+	this.each(function(ship, id) {
+		ship.update(dt);
+	});
+}
 
 Ships.prototype.all = function() {
 	return this.list;
