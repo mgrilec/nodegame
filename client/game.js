@@ -118,5 +118,6 @@ function serverUpdateHandler(data) {
         ships[id].x = data.ships[id].x;
         ships[id].y = data.ships[id].y;
         ships[id].rotation = data.ships[id].rotation;
+        ships[id].label.update();
     }
 }
