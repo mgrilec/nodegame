@@ -1,17 +1,7 @@
-var express = require('express');
-var socketIo = require('socket.io');
+var website = require('./website');
 var Ships = require('./entity/ships');
 
-var app = express();
-
-app.use(express.static('../client'));
-app.get('/', function(req, res) {
-	res.redirect('/index.html');
-});
-
-var server = app.listen(3000);
-
-var io = require('socket.io').listen(server);
+var io = require('socket.io').listen(website);
 io.set("log level", 2);
 
 var server = {
@@ -22,7 +12,7 @@ var server = {
 
 	// server network update rate per second
 	updateRate: 30,
-}
+};
 
 io.sockets.on('connection', function (socket) {
 	socket.on('join_request', clientJoinRequestHandler);
