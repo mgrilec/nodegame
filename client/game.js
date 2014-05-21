@@ -6,11 +6,12 @@ var game = new Phaser.Game(800, 600, Phaser.AUTO, 'game', {
 });
 
 var socket;
-var name;
+var player = {};
 var ships = {};
 
 function preload() {
     game.load.image('ship', 'assets/ship.png');
+    game.load.bitmapFont('visitor', 'assets/fonts/visitor.png', 'assets/fonts/visitor.xml');
 }
 
 function create() {
@@ -18,27 +19,28 @@ function create() {
     // init networking
     socket = io.connect(location.origin);
 
-    // register server update handler
+    // register handlers
+    socket.on('join_response', joinResponseHandler);
     socket.on('server_update', serverUpdateHandler);
 
     // set world bounds
     game.world.setBounds(-10000, -10000, 20000, 20000);
 
     // player enters name
-    name = prompt('enter name');
+    player.name = prompt('enter name');
 
     // send auth
-    socket.emit('client_join', { name: name });
+    socket.emit('join_request', { name: player.name });
 }
 
 function update() {
 
     // get current player ship
-    var player = ships[name];
+    var playerShip = ships[player.id];
 
     // camera follow player
-    if (player) {
-        game.camera.focusOn(player);
+    if (playerShip) {
+        game.camera.focusOn(playerShip);
     }
 
     // controls
@@ -71,19 +73,21 @@ function render() {
 	
 }
 
+function joinResponseHandler(data) {
+    player.id = data.id;
+}
+
 function serverUpdateHandler(data) {
     // get all server ship ids
-    var serverIds = [];
-    for (var id in data.ships) {
-        serverIds.push(id);
-    }
+    var serverIds = Object.keys(data.ships);
 
     // remove ships with non-existent server ids
     for (var id in ships) {
         if (serverIds.indexOf(id) < 0) {
+            console.log('deleting: ' + ships[id].name);
+            ships[id].label.destroy();
             ships[id].destroy();
             delete ships[id];
-            console.log('deleted: ' + id);
         }
     }
 
@@ -94,9 +98,18 @@ function serverUpdateHandler(data) {
             ships[id] = game.add.sprite(0, 0, 'ship');
             ships[id].x = data.ships[id].x;
             ships[id].y = data.ships[id].y;
-            ships[id].angle = data.ships[id].angle;
+            ships[id].rotation = data.ships[id].rotation;
+            ships[id].name = data.ships[id].name;
             ships[id].anchor.setTo(0.5, 0.5);
-            console.log('added: ' + id);
+            ships[id].label = game.add.bitmapText(0, -20, 'visitor', ships[id].name, 16);
+            ships[id].label.owner = ships[id];
+            if (id == player.id)
+                ships[id].label.tint = 0xFF0000;
+            ships[id].label.update = function() {
+                this.x = this.owner.x - this.textWidth / 2;
+                this.y = this.owner.y - 50;
+            }
+            console.log('added: ' + ships[id].name);
         }
     }
 
@@ -104,6 +117,6 @@ function serverUpdateHandler(data) {
     for (var id in ships) {
         ships[id].x = data.ships[id].x;
         ships[id].y = data.ships[id].y;
-        ships[id].angle = data.ships[id].angle;
+        ships[id].rotation = data.ships[id].rotation;
     }
 }
