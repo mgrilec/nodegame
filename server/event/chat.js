@@ -7,10 +7,12 @@ function say(data) {
 
     // content limit
     if (data.msg.length > 100) {
-        // send for signle one
+        // send for single one
         io.sockets.socket(socket.id).emit('error', { msg: 'content is to long'});
         return;
     }
+
+    console.log('chat -> ' + name + ': ' + msg);
 
     io.sockets.emit('say', {
         name: name,

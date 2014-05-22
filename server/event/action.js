@@ -17,6 +17,9 @@ function clientUpdateHandler(data) {
 	else if (data.action == 'down') {
 		ship.speed = -200;
 	}
+	else if (data.action == 'fire') {
+		// entity.Bullets.new(ship);
+	}
 }
 
 module.exports = {
