@@ -36,6 +36,9 @@ function create() {
 
     // send auth
     socket.emit('join_request', { name: player.name });
+
+    // chat
+    socket.on('say', serverChatSay);
 }
 
 // sets up game based on initial join data
@@ -118,7 +121,7 @@ function serverUpdateHandler(data) {
     for (var idIndex in serverIds) {
         var id = serverIds[idIndex];
         if (!ships[id]) {
-            console.log('adding ship: ' + ships[id].name);
+            console.log(ships[id]);
             ships[id] = new Ship(game, id, data.ships[id]);
         }
     }
@@ -127,4 +130,14 @@ function serverUpdateHandler(data) {
     for (var id in ships) {
         ships[id].server_update(data.ships[id]);
     }
+}
+
+function serverChatSay(data) {
+    console.log(data.name + ':' + data.msg);
+}
+
+function clientChatSay(content) {
+    socket.emit('say', {
+        msg: content
+    });
 }
