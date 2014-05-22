@@ -7,6 +7,7 @@ io.sockets.on('connection', function (socket) {
 	socket.on('join_request', event.connect.clientJoinRequestHandler);
 	socket.on('client_update', event.action.clientUpdateHandler);
 	socket.on('disconnect', event.connect.clientDisconnectHandler);
+	socket.on('say', event.chat.clientSay);
 });
 
 setInterval(event.update.ships, 1000 / settings.tickRate);

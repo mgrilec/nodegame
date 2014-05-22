@@ -4,7 +4,7 @@ var entity = require('../entity');
 function clientJoinRequestHandler(data) {
 	var socket = this;
 	var id = socket.id;
-	var name = data.name;
+	var name = socket.name = data.name;
 	socket.emit('join_response', { id: socket.id, bounds: settings.bounds });
 	entity.Ships.new(id, name);
 }
