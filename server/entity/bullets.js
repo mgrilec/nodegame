@@ -7,7 +7,7 @@ function Bullets() {
 
 // add new bullet
 Bullets.prototype.new = function(owner) {
-	this.list.push(new Bullet(this, owner));	
+	this.list.push(new Bullet(owner));	
 };
 
 Bullets.prototype.del = function(index) {
@@ -19,12 +19,13 @@ Bullets.prototype.each = function(cb) {
 };
 
 Bullets.prototype.update = function(dt) {
-	this.each(function(bullet, index) {
+	for (var bulletIndex in this.list) {
+		var bullet = this.list[bulletIndex];
 		bullet.update(dt);
 		if (bullet.dead) {
-			this.manager.del(index);
+			this.del(bulletIndex);
 		}
-	});
+	}
 }
 
 Bullets.prototype.all = function() {

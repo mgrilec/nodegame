@@ -49,13 +49,23 @@ function create() {
         chat.chatInputElement.value = "";
     }
 
+    // submit on enter
+    chat.chatInputElement.onkeyup = function(e) {
+        if (e.keyCode == 13) {
+            clientChatSay(chat.chatInputElement.value);
+            chat.chatInputElement.value = "";
+        }
+    }
+
     chat.update = function() {
          var visibleEntries = chat.log.slice(Math.max(0, chat.log.length - 5));
-         chat.text = '';
+         var text = '';
          for (var chatIndex in visibleEntries) {
             var chatEntry = visibleEntries[chatIndex];
-            chat.text += chatEntry.name + ": " + chatEntry.msg + '\n';
+            text += chatEntry.name + ": " + chatEntry.msg + '\n';
          }
+
+         chat.setText(text);
     }
 
     socket.on('say', serverChatSay);

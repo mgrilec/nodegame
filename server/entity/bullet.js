@@ -1,5 +1,4 @@
-var Bullet = function(manager, owner) {
-	this.manager = manager;
+var Bullet = function(owner) {
 	this.x = owner.x;
 	this.y = owner.y;
 	this.rotation = owner.rotation;
