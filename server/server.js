@@ -1,5 +1,5 @@
 var website = require('./website');
-var Ships = require('./entity/ships');
+var entity = require('./entity');
 
 var io = require('socket.io').listen(website);
 io.set("log level", 2);
@@ -24,11 +24,11 @@ io.sockets.on('connection', function (socket) {
 });
 
 function networkUpdate () {
-	io.sockets.emit('server_update', {ships: Ships.all()});
+	io.sockets.emit('server_update', {ships: entity.Ships.all()});
 }
 
 function update() {
-	Ships.update(settings.dt);
+	entity.Ships.update(settings.dt);
 }
 
 function clientJoinRequestHandler(data) {
@@ -36,13 +36,13 @@ function clientJoinRequestHandler(data) {
 	var id = socket.id;
 	var name = data.name;
 	socket.emit('join_response', { id: socket.id, bounds: settings.bounds });
-	Ships.new(id, name);
+	entity.Ships.new(id, name);
 }
 
 function clientUpdateHandler(data) {
 	var socket = this;
 	var id = socket.id;
-	var ship = Ships.get(id);
+	var ship = entity.Ships.get(id);
 
 	if(data.action == 'left') {
 		ship.torque = -5;
@@ -61,7 +61,7 @@ function clientUpdateHandler(data) {
 function clientDisconnectHandler() {
 	var socket = this;
 	var id = socket.id;
-	Ships.del(id);
+	entity.Ships.del(id);
 }
 
 setInterval(update, 1000 / settings.tickRate);

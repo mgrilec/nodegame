@@ -1,0 +1,1 @@
+exports.Ships = require('./ships');
