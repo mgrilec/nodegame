@@ -8,9 +8,13 @@ var game = new Phaser.Game(800, 600, Phaser.AUTO, 'game', {
 var socket;
 var player = {};
 var ships = {};
+var groups = { background: '', ships: '', labels: '' };
+var state = "joining";
 
 function preload() {
     game.load.image('ship', 'assets/ship.png');
+    game.load.image('background', 'assets/background.png');
+    game.load.image('background_detail', 'assets/background_detail.png');
     game.load.bitmapFont('visitor', 'assets/fonts/visitor.png', 'assets/fonts/visitor.xml');
 }
 
@@ -23,8 +27,9 @@ function create() {
     socket.on('join_response', joinResponseHandler);
     socket.on('server_update', serverUpdateHandler);
 
-    // set world bounds
-    game.world.setBounds(-10000, -10000, 20000, 20000);
+    // init groups
+    for (var groupName in groups)
+        groups[groupName] = game.add.group();
 
     // player enters name
     player.name = prompt('enter name');
@@ -33,7 +38,25 @@ function create() {
     socket.emit('join_request', { name: player.name });
 }
 
+// sets up game based on initial join data
+function initialize(data) {
+
+    // set world bounds
+    game.world.setBounds(-data.bounds.x / 2, -data.bounds.y / 2, data.bounds.x, data.bounds.y);
+
+    // create background
+    var background = game.add.tileSprite(-data.bounds.x / 2, -data.bounds.y / 2, data.bounds.x, data.bounds.y, 'background');
+    var backgroundDetail = game.add.tileSprite(-data.bounds.x / 2, -data.bounds.y / 2, data.bounds.x, data.bounds.y, 'background_detail');
+    groups.background.add(background);
+    groups.background.add(backgroundDetail);
+
+    state = "ingame";
+}
+
 function update() {
+
+    if (state != "ingame")
+        return;
 
     // get current player ship
     var playerShip = ships[player.id];
@@ -75,6 +98,7 @@ function render() {
 
 function joinResponseHandler(data) {
     player.id = data.id;
+    initialize(data);
 }
 
 function serverUpdateHandler(data) {
@@ -84,9 +108,8 @@ function serverUpdateHandler(data) {
     // remove ships with non-existent server ids
     for (var id in ships) {
         if (serverIds.indexOf(id) < 0) {
-            console.log('deleting: ' + ships[id].name);
-            ships[id].label.destroy();
-            ships[id].destroy();
+            console.log('deleting ship: ' + ships[id].name);
+            ships[id].kill();
             delete ships[id];
         }
     }
@@ -95,29 +118,13 @@ function serverUpdateHandler(data) {
     for (var idIndex in serverIds) {
         var id = serverIds[idIndex];
         if (!ships[id]) {
-            ships[id] = game.add.sprite(0, 0, 'ship');
-            ships[id].x = data.ships[id].x;
-            ships[id].y = data.ships[id].y;
-            ships[id].rotation = data.ships[id].rotation;
-            ships[id].name = data.ships[id].name;
-            ships[id].anchor.setTo(0.5, 0.5);
-            ships[id].label = game.add.bitmapText(0, -20, 'visitor', ships[id].name, 16);
-            ships[id].label.owner = ships[id];
-            if (id == player.id)
-                ships[id].label.tint = 0xFF0000;
-            ships[id].label.update = function() {
-                this.x = this.owner.x - this.textWidth / 2;
-                this.y = this.owner.y - 50;
-            }
-            console.log('added: ' + ships[id].name);
+            console.log('adding ship: ' + ships[id].name);
+            ships[id] = new Ship(game, id, data.ships[id]);
         }
     }
 
     // update ships
     for (var id in ships) {
-        ships[id].x = data.ships[id].x;
-        ships[id].y = data.ships[id].y;
-        ships[id].rotation = data.ships[id].rotation;
-        ships[id].label.update();
+        ships[id].server_update(data.ships[id]);
     }
 }

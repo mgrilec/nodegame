@@ -4,13 +4,16 @@ var Ships = require('./entity/ships');
 var io = require('socket.io').listen(website);
 io.set("log level", 2);
 
-var server = {
+var settings = {
 
-	// server update rate per second
+	// game bounds
+	bounds: { x: 20000, y: 20000 },
+
+	// update rate per second
 	tickRate: 60,
 	dt: 1 / 60,
 
-	// server network update rate per second
+	// network update rate per second
 	updateRate: 30,
 };
 
@@ -25,21 +28,14 @@ function networkUpdate () {
 }
 
 function update() {
-	Ships.each(function(ship, id) {
-		ship.x += Math.cos(ship.rotation) * ship.speed * server.dt;
-		ship.y += Math.sin(ship.rotation) * ship.speed * server.dt;
-		ship.rotation += ship.torque * server.dt;
-
-		ship.speed *= 0.9;
-		ship.torque *= 0.9;
-	});
+	Ships.update(settings.dt);
 }
 
 function clientJoinRequestHandler(data) {
 	var socket = this;
 	var id = socket.id;
 	var name = data.name;
-	socket.emit('join_response', { id: socket.id });
+	socket.emit('join_response', { id: socket.id, bounds: settings.bounds });
 	Ships.new(id, name);
 }
 
@@ -68,6 +64,6 @@ function clientDisconnectHandler() {
 	Ships.del(id);
 }
 
-setInterval(update, 1000 / server.tickRate);
-setInterval(networkUpdate, 1000 / server.updateRate);
+setInterval(update, 1000 / settings.tickRate);
+setInterval(networkUpdate, 1000 / settings.updateRate);
 console.log('view the example on http://127.0.0.1:3000');
