@@ -13,15 +13,15 @@ var Ship = function(game, id, data) {
 
     // add to game and group
     game.add.existing(this);
-    groups.ships.add(this);
+    game.groups.ships.add(this);
 
     // set label
     this.label = game.add.bitmapText(0, -20, 'visitor', this.name, 16);
     this.label.owner = this;
-    if (id == player.id)
+    if (id == game.player.id)
         this.label.tint = 0xFF0000;
 
-    groups.labels.add(this.label);
+    game.groups.labels.add(this.label);
     this.label.update = function() {
         this.x = this.owner.x - this.textWidth / 2;
         this.y = this.owner.y - 50;

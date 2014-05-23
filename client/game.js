@@ -1,16 +1,14 @@
 var game = new Phaser.Game(800, 600, Phaser.AUTO, 'game', {
-    preload: preload,
-    create: create,
-    update: update,
-    render: render
+    preload: this.preload,
+    create: this.create,
+    update: this.update,
+    render: this.render
 });
 
-var socket;
-var player = {};
-var ships = {};
-var groups = { background: '', ships: '', labels: '' };
-var state = "joining";
-var chat = {};
+game.socket;
+game.player = {};
+game.ships = {};
+game.groups = { background: '', ships: '', labels: '' };
 
 function preload() {
     game.load.image('ship', 'assets/ship.png');
@@ -22,61 +20,33 @@ function preload() {
 function create() {
 
     // init networking
-    socket = io.connect(location.origin);
+    game.socket = io.connect(location.origin);
 
     // register handlers
-    socket.on('join_response', joinResponseHandler);
-    socket.on('server_update', serverUpdateHandler);
-    socket.on('reconnection', reconnectionHandler);
+    game.socket.on('join_response', game.joinResponseHandler);
+    game.socket.on('server_update', game.serverUpdateHandler);
+    game.socket.on('reconnection', game.reconnectionHandler);
+    game.socket.on('say', game.serverChatSay);
 
     // init groups
-    for (var groupName in groups)
-        groups[groupName] = game.add.group();
+    for (var groupName in game.groups)
+        game.groups[groupName] = game.add.group();
+
+    // init chat
+    game.chat = new Chat(game);
 
     // player enters name
-    player.name = prompt('enter name');
+    game.player.name = prompt('enter name');
 
     // send auth
-    socket.emit('join_request', { name: player.name });
+    game.socket.emit('join_request', { name: game.player.name });
 
     // fire
-    socket.on('ship_fire', shipFireHandler);
-
-    // chat
-    chat = game.add.bitmapText(5, 5, 'visitor', '', 16);
-    chat.fixedToCamera = true;
-    chat.log = [{ name: 'System', msg: 'Welcome!' }, ];
-    chat.chatInputElement = document.getElementById('chat_input');
-    chat.chatSendElement = document.getElementById('chat_send');
-    chat.chatSendElement.onclick = function() {
-        clientChatSay(chat.chatInputElement.value);
-        chat.chatInputElement.value = "";
-    }
-
-    // submit on enter
-    chat.chatInputElement.onkeyup = function(e) {
-        if (e.keyCode == 13) {
-            clientChatSay(chat.chatInputElement.value);
-            chat.chatInputElement.value = "";
-        }
-    }
-
-    chat.update = function() {
-         var visibleEntries = chat.log.slice(Math.max(0, chat.log.length - 5));
-         var text = '';
-         for (var chatIndex in visibleEntries) {
-            var chatEntry = visibleEntries[chatIndex];
-            text += chatEntry.name + ": " + chatEntry.msg + '\n';
-         }
-
-         chat.setText(text);
-    }
-
-    socket.on('say', serverChatSay);
+    game.socket.on('ship_fire', game.shipFireHandler);
 }
 
 // sets up game based on initial join data
-function initialize(data) {
+game.initialize = function(data) {
 
     // set world bounds
     game.world.setBounds(-data.bounds.x / 2, -data.bounds.y / 2, data.bounds.x, data.bounds.y);
@@ -84,19 +54,14 @@ function initialize(data) {
     // create background
     var background = game.add.tileSprite(-data.bounds.x / 2, -data.bounds.y / 2, data.bounds.x, data.bounds.y, 'background');
     var backgroundDetail = game.add.tileSprite(-data.bounds.x / 2, -data.bounds.y / 2, data.bounds.x, data.bounds.y, 'background_detail');
-    groups.background.add(background);
-    groups.background.add(backgroundDetail);
-
-    state = "ingame";
+    game.groups.background.add(background);
+    game.groups.background.add(backgroundDetail);
 }
 
 function update() {
 
-    if (state != "ingame")
-        return;
-
     // get current player ship
-    var playerShip = ships[player.id];
+    var playerShip = game.ships[game.player.id];
 
     // camera follow player
     if (playerShip) {
@@ -105,31 +70,31 @@ function update() {
 
     // controls
     if (game.input.keyboard.isDown(Phaser.Keyboard.LEFT)) {
-        socket.emit('client_update', {
+        game.socket.emit('client_update', {
             action: 'left'
         });
     }
 
     if (game.input.keyboard.isDown(Phaser.Keyboard.RIGHT)) {
-        socket.emit('client_update', {
+        game.socket.emit('client_update', {
             action: 'right'
         });
     }
 
     if (game.input.keyboard.isDown(Phaser.Keyboard.UP)) {
-        socket.emit('client_update', {
+        game.socket.emit('client_update', {
             action: 'up'
         });
     }
 
     if (game.input.keyboard.isDown(Phaser.Keyboard.DOWN)) {
-        socket.emit('client_update', {
+        game.socket.emit('client_update', {
             action: 'down'
         });
     }
 
     if (game.input.keyboard.isDown(Phaser.Keyboard.A)) {
-        socket.emit('client_update', {
+        game.socket.emit('client_update', {
             action: 'fire'
         });
     }
@@ -139,54 +104,54 @@ function render() {
 	
 }
 
-function joinResponseHandler(data) {
-    player.id = data.id;
-    initialize(data);
+game.joinResponseHandler = function(data) {
+    game.player.id = data.id;
+    game.initialize(data);
 }
 
-function serverUpdateHandler(data) {
+game.serverUpdateHandler = function(data) {
     // get all server ship ids
     var serverIds = Object.keys(data.ships);
 
     // remove ships with non-existent server ids
-    for (var id in ships) {
+    for (var id in game.ships) {
         if (serverIds.indexOf(id) < 0) {
-            console.log('deleting ship: ' + ships[id].name);
-            ships[id].kill();
-            delete ships[id];
+            console.log('deleting ship: ' + game.ships[id].name);
+            game.ships[id].kill();
+            delete game.ships[id];
         }
     }
 
     // add ships with non-existent local ids
     for (var idIndex in serverIds) {
         var id = serverIds[idIndex];
-        if (!ships[id]) {
+        if (!game.ships[id]) {
             console.log('adding ship: ' + data.ships[id].name);
-            ships[id] = new Ship(game, id, data.ships[id]);
+            game.ships[id] = new Ship(game, id, data.ships[id]);
         }
     }
 
     // update ships
-    for (var id in ships) {
-        ships[id].server_update(data.ships[id]);
+    for (var id in game.ships) {
+        game.ships[id].server_update(data.ships[id]);
     }
 }
 
-function reconnectionHandler(data) {
+game.reconnectionHandler = function(data) {
     console.log(data);
-    socket.close();
+    game.socket.close();
 }
 
-function shipFireHandler(data) {
+game.shipFireHandler = function(data) {
     console.log(data);
 }
 
-function serverChatSay(data) {
-    chat.log.push(data);
+game.serverChatSay = function(data) {
+    game.chat.log.push(data);
 }
 
-function clientChatSay(content) {
-    socket.emit('say', {
+game.clientChatSay = function(content) {
+    game.socket.emit('say', {
         msg: content
     });
 }
