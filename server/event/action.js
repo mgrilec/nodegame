@@ -2,8 +2,13 @@ var entity = require('../entity');
 
 function clientUpdateHandler(data) {
 	var socket = this;
-	var id = socket.id;
+	var id = socket.handshake.id;
 	var ship = entity.Ships.get(id);
+
+	if (!ship) {
+		socket.emit('error', { level: 1, msg: 'ship not found' });
+		return;
+	}
 
 	if(data.action == 'left') {
 		ship.torque = -5;
@@ -21,6 +26,8 @@ function clientUpdateHandler(data) {
 		var bullet = ship.fire();
 		socket.emit('ship_fire', { id: socket.id, bullet: bullet });
 	}
+
+	ship.disconnect = false;
 }
 
 module.exports = {

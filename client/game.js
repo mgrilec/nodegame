@@ -27,6 +27,7 @@ function create() {
     // register handlers
     socket.on('join_response', joinResponseHandler);
     socket.on('server_update', serverUpdateHandler);
+    socket.on('reconnection', reconnectionHandler);
 
     // init groups
     for (var groupName in groups)
@@ -169,6 +170,11 @@ function serverUpdateHandler(data) {
     for (var id in ships) {
         ships[id].server_update(data.ships[id]);
     }
+}
+
+function reconnectionHandler(data) {
+    console.log(data);
+    socket.close();
 }
 
 function shipFireHandler(data) {

@@ -7,6 +7,7 @@ var Ship = function(name) {
 	this.speed = 0;
 	this.torque = 0;
 	this.name = name;
+	this.disconnect = false;
 }
 
 Ship.prototype.update = function(dt) {
