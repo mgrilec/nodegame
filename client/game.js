@@ -38,6 +38,9 @@ function create() {
     // send auth
     socket.emit('join_request', { name: player.name });
 
+    // fire
+    socket.on('ship_fire', shipFireHandler);
+
     // chat
     chat = game.add.bitmapText(5, 5, 'visitor', '', 16);
     chat.fixedToCamera = true;
@@ -166,6 +169,10 @@ function serverUpdateHandler(data) {
     for (var id in ships) {
         ships[id].server_update(data.ships[id]);
     }
+}
+
+function shipFireHandler(data) {
+    console.log(data);
 }
 
 function serverChatSay(data) {

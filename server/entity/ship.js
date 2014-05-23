@@ -1,3 +1,5 @@
+var entity = require('./');
+
 var Ship = function(name) {
 	this.x = 0;
 	this.y = 0;
@@ -14,6 +16,10 @@ Ship.prototype.update = function(dt) {
 
 	this.speed *= 0.9;
 	this.torque *= 0.9;
-}
+};
+
+Ship.prototype.fire = function() {
+	return entity.Bullets.new(this);
+};
 
 module.exports = Ship;

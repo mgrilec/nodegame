@@ -18,7 +18,8 @@ function clientUpdateHandler(data) {
 		ship.speed = -200;
 	}
 	else if (data.action == 'fire') {
-		entity.Bullets.new(ship);
+		var bullet = ship.fire();
+		socket.emit('ship_fire', { id: socket.id, bullet: bullet });
 	}
 }
 
