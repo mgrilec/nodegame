@@ -10,5 +10,5 @@ io.sockets.on('connection', function (socket) {
 	socket.on('say', event.chat.clientSay);
 });
 
-setInterval(event.update.ships, 1000 / settings.tickRate);
+setInterval(event.update.update, 1000 / settings.tickRate);
 setInterval(event.update.network, 1000 / settings.updateRate);

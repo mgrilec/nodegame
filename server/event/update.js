@@ -3,14 +3,15 @@ var entity = require('../entity');
 var settings = require('../config/settings');
 
 function networkUpdate() {
-	io.sockets.emit('server_update', {ships: entity.Ships.all()});
+	io.sockets.emit('server_update', {ships: entity.Ships.all(), bullets: entity.Bullets.all()});
 }
 
-function shipsUpdate() {
+function update() {
 	entity.Ships.update(settings.dt);
+	entity.Bullets.update(settings.dt);
 }
 
 module.exports = {
 	network: networkUpdate,
-	ships: shipsUpdate
+	update: update
 };

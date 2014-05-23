@@ -10,6 +10,7 @@ var player = {};
 var ships = {};
 var groups = { background: '', ships: '', labels: '' };
 var state = "joining";
+var chat = {};
 
 function preload() {
     game.load.image('ship', 'assets/ship.png');
@@ -38,6 +39,35 @@ function create() {
     socket.emit('join_request', { name: player.name });
 
     // chat
+    chat = game.add.bitmapText(5, 5, 'visitor', '', 16);
+    chat.fixedToCamera = true;
+    chat.log = [{ name: 'System', msg: 'Welcome!' }, ];
+    chat.chatInputElement = document.getElementById('chat_input');
+    chat.chatSendElement = document.getElementById('chat_send');
+    chat.chatSendElement.onclick = function() {
+        clientChatSay(chat.chatInputElement.value);
+        chat.chatInputElement.value = "";
+    }
+
+    // submit on enter
+    chat.chatInputElement.onkeyup = function(e) {
+        if (e.keyCode == 13) {
+            clientChatSay(chat.chatInputElement.value);
+            chat.chatInputElement.value = "";
+        }
+    }
+
+    chat.update = function() {
+         var visibleEntries = chat.log.slice(Math.max(0, chat.log.length - 5));
+         var text = '';
+         for (var chatIndex in visibleEntries) {
+            var chatEntry = visibleEntries[chatIndex];
+            text += chatEntry.name + ": " + chatEntry.msg + '\n';
+         }
+
+         chat.setText(text);
+    }
+
     socket.on('say', serverChatSay);
 }
 
@@ -93,6 +123,12 @@ function update() {
             action: 'down'
         });
     }
+
+    if (game.input.keyboard.isDown(Phaser.Keyboard.A)) {
+        socket.emit('client_update', {
+            action: 'fire'
+        });
+    }
 }
 
 function render() {
@@ -121,7 +157,7 @@ function serverUpdateHandler(data) {
     for (var idIndex in serverIds) {
         var id = serverIds[idIndex];
         if (!ships[id]) {
-            console.log(ships[id]);
+            console.log('adding ship: ' + data.ships[id].name);
             ships[id] = new Ship(game, id, data.ships[id]);
         }
     }
@@ -133,7 +169,7 @@ function serverUpdateHandler(data) {
 }
 
 function serverChatSay(data) {
-    console.log(data.name + ':' + data.msg);
+    chat.log.push(data);
 }
 
 function clientChatSay(content) {
