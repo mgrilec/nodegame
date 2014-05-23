@@ -2,16 +2,20 @@ var settings = require('../config/settings');
 var entity = require('../entity');
 
 function clientJoinRequestHandler(data) {
+	console.log('clientJoinRequestHandler');
 	var socket = this;
-	var id = socket.id;
+	var id = socket.handshake.id;
 	var name = socket.name = data.name;
-	socket.emit('join_response', { id: socket.id, bounds: settings.bounds });
-	entity.Ships.new(id, name);
+
+	entity.Ships.new(id, name)
+	socket.emit('join_response', { id: id, bounds: settings.bounds });
+
+	// 	socket.emit('reconnection', { });
 }
 
 function clientDisconnectHandler() {
 	var socket = this;
-	var id = socket.id;
+	var id = socket.handshake.id;
 	entity.Ships.del(id);
 }
 
