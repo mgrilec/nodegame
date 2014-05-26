@@ -8,7 +8,7 @@ var Ship = function(game, id, data) {
 
     // kill label
     this.events.onKilled.add(function() {
-    	// this.label.kill();
+    	this.label.destroy();
     }, this);
 
     // add to game and group
