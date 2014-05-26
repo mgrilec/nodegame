@@ -5,22 +5,26 @@ var Ship = function(name) {
 	this.x = 0;
 	this.y = 0;
 	this.rotation = 0;
-	this.speed = 0;
+	this.speed = { x: 0, y: 0 };
 	this.torque = 0;
 	this.name = name;
 }
 
 Ship.prototype.update = function(dt) {
-	this.x += Math.cos(this.rotation) * this.speed * dt;
-	this.y += Math.sin(this.rotation) * this.speed * dt;
+	this.x += this.speed.x * dt;
+	this.y += this.speed.y * dt;
 	this.rotation += this.torque * dt;
 
 	// drag the speed
+	var speedLenght = Math.sqrt(this.speed.x * this.speed.x + this.speed.y * this.speed.y);
+	var speedNormalized = { x: this.speed.x / speedLenght, y: this.speed.y / speedLenght };
 	var moveDrag = settings.game.ship.moveDrag * dt;
-	if (Math.abs(this.speed) < moveDrag) {
-		this.speed = 0;
+	if (speedLenght < moveDrag) {
+		this.speed.x = 0;
+		this.speed.y = 0;
 	} else {
-		this.speed -= this.speed / Math.abs(this.speed) * moveDrag;
+		this.speed.x -= speedNormalized.x * moveDrag;
+		this.speed.y -= speedNormalized.y * moveDrag;
 	}
 
 	// drag the rotation

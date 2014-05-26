@@ -18,10 +18,14 @@ function clientUpdateHandler(data) {
 		ship.torque = settings.game.ship.turnSpeed;
 	}
 	else if (data.action == 'up') {
-		ship.speed = settings.game.ship.moveSpeed;
+		var direction = { x: Math.cos(ship.rotation), y: Math.sin(ship.rotation) };
+		ship.speed.x = direction.x * settings.game.ship.moveSpeed;
+		ship.speed.y = direction.y * settings.game.ship.moveSpeed;
 	}
 	else if (data.action == 'down') {
-		ship.speed = -settings.game.ship.moveSpeed;
+		var direction = { x: Math.cos(ship.rotation), y: Math.sin(ship.rotation) };
+		ship.speed.x = -direction.x * settings.game.ship.moveSpeed;
+		ship.speed.y = -direction.y * settings.game.ship.moveSpeed;
 	}
 	else if (data.action == 'fire') {
 		var bullet = ship.fire();

@@ -9,7 +9,7 @@ module.exports = {
 		// ship defaults
 		ship: {
 			moveSpeed: 200,
-			moveDrag: 600,
+			moveDrag: 100,
 			turnSpeed: 5,
 			turnDrag: 25,
 		}
