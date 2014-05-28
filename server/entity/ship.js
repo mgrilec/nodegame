@@ -1,11 +1,12 @@
 var entity = require('./');
 var settings = require('../config/settings');
+var math = require('../math');
 
 var Ship = function(name) {
 	this.x = 0;
 	this.y = 0;
 	this.rotation = 0;
-	this.speed = { x: 0, y: 0 };
+	this.speed = new math.point(0, 0);
 	this.torque = 0;
 	this.name = name;
 }
@@ -16,15 +17,14 @@ Ship.prototype.update = function(dt) {
 	this.rotation += this.torque * dt;
 
 	// drag the speed
-	var speedLenght = Math.sqrt(this.speed.x * this.speed.x + this.speed.y * this.speed.y);
-	var speedNormalized = { x: this.speed.x / speedLenght, y: this.speed.y / speedLenght };
+	var speedLenght = this.speed.length();
+	var speedNormalized = this.speed.normalize();
 	var moveDrag = settings.game.ship.moveDrag * dt;
 	if (speedLenght < moveDrag) {
 		this.speed.x = 0;
 		this.speed.y = 0;
 	} else {
-		this.speed.x -= speedNormalized.x * moveDrag;
-		this.speed.y -= speedNormalized.y * moveDrag;
+		this.speed = this.speed.sub(speedNormalized.mul(moveDrag));
 	}
 
 	// drag the rotation
