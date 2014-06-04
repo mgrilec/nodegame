@@ -3,6 +3,11 @@ var entity = require('../entity');
 var settings = require('../config/settings');
 
 function networkUpdate() {
+
+	// create map
+	var map = {};
+	
+
 	io.sockets.emit('server_update', {ships: entity.Ships.all(), bullets: entity.Bullets.all()});
 }
 

@@ -6,16 +6,14 @@ function Ships() {
 }
 
 Ships.prototype.new = function(id, name) {
-	// reconnection
 	if (this.list[id]) {
-		console.log('reconnection!');
-		return false;
+		return null;
 	}
 
 	// new connection
 	this.list[id] = new Ship(name);
 	console.log(name + " joined, id:" + id);
-	return true;
+	return this.list[id];
 };
 
 Ships.prototype.get = function(id) {
@@ -26,14 +24,7 @@ Ships.prototype.del = function(id) {
 	var list = this.list;
 	var ship = list[id];
 	if (!ship) return;
-
-	ship.disconnect = true;
-	setTimeout(function() {
-		if (ship.disconnect) {
-			console.log(list[id].name + " left, id:" + id);
-			delete list[id];
-		}
-	}, 10 * 1000);
+	delete list[id];
 };
 
 Ships.prototype.each = function(cb) {

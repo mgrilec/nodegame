@@ -1,8 +1,9 @@
 var entity = require('../entity');
+var settings = require('../config/settings');
 
 function clientUpdateHandler(data) {
 	var socket = this;
-	var id = socket.handshake.id;
+	var id = socket.id;
 	var ship = entity.Ships.get(id);
 
 	if (!ship) {
@@ -11,16 +12,20 @@ function clientUpdateHandler(data) {
 	}
 
 	if(data.action == 'left') {
-		ship.torque = -5;
+		ship.torque = -settings.game.ship.turnSpeed;
 	}
 	else if (data.action == 'right') {
-		ship.torque = 5;
+		ship.torque = settings.game.ship.turnSpeed;
 	}
 	else if (data.action == 'up') {
-		ship.speed = 200;
+		var direction = { x: Math.cos(ship.rotation), y: Math.sin(ship.rotation) };
+		ship.speed.x = direction.x * settings.game.ship.moveSpeed;
+		ship.speed.y = direction.y * settings.game.ship.moveSpeed;
 	}
 	else if (data.action == 'down') {
-		ship.speed = -200;
+		var direction = { x: Math.cos(ship.rotation), y: Math.sin(ship.rotation) };
+		ship.speed.x = -direction.x * settings.game.ship.moveSpeed;
+		ship.speed.y = -direction.y * settings.game.ship.moveSpeed;
 	}
 	else if (data.action == 'fire') {
 		var bullet = ship.fire();
